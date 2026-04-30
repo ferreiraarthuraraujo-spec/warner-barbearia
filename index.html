@@ -489,13 +489,54 @@ function getSlots(date) {
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
+// Calendário do Mathias (dia apenas, sem horário)
+let calYearM = today.getFullYear(), calMonthM = today.getMonth();
+
+function renderCalendarMathias() {
+  document.getElementById('cal-month-label-m').textContent = MONTHS[calMonthM] + ' ' + calYearM;
+  const grid = document.getElementById('days-grid-m');
+  grid.innerHTML = '';
+  const firstDay    = new Date(calYearM, calMonthM, 1).getDay();
+  const daysInMonth = new Date(calYearM, calMonthM + 1, 0).getDate();
+  for (let i = 0; i < firstDay; i++) {
+    const e = document.createElement('div'); e.className = 'day-cell empty'; grid.appendChild(e);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYearM, calMonthM, d);
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    cell.textContent = d;
+    if (date.getTime() === today.getTime()) cell.classList.add('today');
+    if (date < today)       { cell.classList.add('past'); }
+    else if (!isOpen(date)) { cell.classList.add('closed'); }
+    else {
+      cell.classList.add('available');
+      const dk = `${calYearM}-${pad(calMonthM+1)}-${pad(d)}`;
+      cell.onclick = () => {
+        document.querySelectorAll('#days-grid-m .day-cell').forEach(c => c.classList.remove('selected'));
+        cell.classList.add('selected');
+        state.date = dk;
+        state.slot = 'sem_hora';
+        document.getElementById('btn-next-3').disabled = false;
+      };
+      if (state.date === dk) cell.classList.add('selected');
+    }
+    grid.appendChild(cell);
+  }
+}
+function prevMonthM() { calMonthM--; if (calMonthM < 0) { calMonthM = 11; calYearM--; } renderCalendarMathias(); }
+function nextMonthM() { calMonthM++; if (calMonthM > 11) { calMonthM = 0;  calYearM++; } renderCalendarMathias(); }
+window.prevMonthM = prevMonthM;
+window.nextMonthM = nextMonthM;
+
 function renderCalendar() {
   const mathias = state.barber === 'Mathias';
   document.getElementById('mathias-panel').style.display = mathias ? 'block' : 'none';
   document.getElementById('warner-calendar').style.display = mathias ? 'none' : 'block';
   if (mathias) {
-    state.date = 'sem_hora'; state.slot = 'sem_hora';
-    document.getElementById('btn-next-3').disabled = false;
+    state.slot = 'sem_hora';
+    document.getElementById('btn-next-3').disabled = true; // obriga escolher dia
+    renderCalendarMathias();
     return;
   }
 
@@ -632,7 +673,7 @@ function renderMiniSummary() {
 }
 
 function formatDate(dk) {
-  if (!dk || dk === 'sem_hora') return '';
+  if (!dk || dk === 'sem_hora') return 'A confirmar';
   const [y, m, d] = dk.split('-');
   const date = new Date(+y, +m - 1, +d);
   return ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][date.getDay()] + ' ' + d + '/' + m + '/' + y;
