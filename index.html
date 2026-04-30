@@ -483,7 +483,12 @@ function getSlots(date) {
   const sat = date.getDay() === 6;
   const s = sat ? 8 : 9, e = sat ? 16 : 19;
   const r = [];
-  for (let h = s; h < e; h++) r.push(pad(h) + ':00');
+  for (let h = s; h < e; h++) {
+    if (h === 13) continue; // almoço do Warner
+    r.push(pad(h) + ':00');
+  }
+  // Último horário especial: 18:40 (apenas dias úteis)
+  if (!sat) r.push('18:40');
   return r;
 }
 
