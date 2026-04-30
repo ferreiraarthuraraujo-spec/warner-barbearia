@@ -278,9 +278,25 @@
   <!-- PANEL 3: DATA -->
   <div class="panel" id="panel-3">
     <div class="panel-title">Data e Horário</div>
-    <div id="mathias-panel" class="mathias-note" style="display:none">
-      <strong>Mathias não trabalha com hora marcada.</strong><br>
-      Apareça na barbearia no horário de funcionamento e será atendido por ordem de chegada.
+    <div id="mathias-panel" style="display:none">
+      <div class="mathias-note" style="margin-bottom:16px">
+        <strong>Mathias atende por ordem de chegada.</strong><br>
+        Escolha o dia que pretende aparecer — não há horário fixo.
+      </div>
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="prevMonthM()">&#8249;</button>
+          <div class="cal-month" id="cal-month-label-m"></div>
+          <button class="cal-nav" onclick="nextMonthM()">&#8250;</button>
+        </div>
+        <div class="cal-grid">
+          <div class="dow-row">
+            <div class="dow">Dom</div><div class="dow">Seg</div><div class="dow">Ter</div>
+            <div class="dow">Qua</div><div class="dow">Qui</div><div class="dow">Sex</div><div class="dow">Sáb</div>
+          </div>
+          <div class="days-grid" id="days-grid-m"></div>
+        </div>
+      </div>
     </div>
     <div id="warner-calendar">
       <div class="calendar-wrap">
