@@ -118,11 +118,14 @@
   .realtime-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; display:inline-block; margin-right:6px; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  @media(max-width:700px){
+ @media(max-width:700px){
     .admin-header{padding:0 14px;}
     .date-title{font-size:17px;}
     th:nth-child(3),td:nth-child(3),th:nth-child(5),td:nth-child(5){display:none;}
     .admin-actions .btn-small{display:none;}
+    /* Botões de ação empilham verticalmente no celular */
+    td:last-child { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+    .btn-small { font-size:12px; padding:8px 14px; width:100%; text-align:center; }
   }
 </style>
 </head>
