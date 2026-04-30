@@ -126,54 +126,6 @@
     /* Botões de ação empilham verticalmente no celular */
     td:last-child { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
     .btn-small { font-size:12px; padding:8px 14px; width:100%; text-align:center; }
-  /* CARDS DE AGENDAMENTO (substitui tabela no mobile, funciona em todos tamanhos) */
-  .table-wrap { overflow: visible; }
-  .ag-list { display: grid; gap: 12px; padding: 16px; }
-  .ag-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0 14px;
-  }
-  .ag-card.status-cancelado { opacity: 0.5; }
-  .ag-card.status-concluido { opacity: 0.65; }
-  .ag-time {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--white);
-    line-height: 1;
-    grid-row: span 3;
-    align-self: center;
-    min-width: 64px;
-    text-align: center;
-    border-right: 1px solid var(--border);
-    padding-right: 14px;
-    margin-right: 0;
-  }
-  .ag-name { font-weight: 600; font-size: 15px; color: var(--white); margin-bottom: 3px; }
-  .ag-meta { font-size: 12px; color: var(--silver); margin-bottom: 8px; }
-  .ag-meta span { margin-right: 12px; }
-  .ag-meta a { color: var(--accent); text-decoration: none; }
-  .ag-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .ag-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
-  .btn-concluir {
-    background: none; border: 1px solid rgba(37,211,102,0.4); color: var(--green);
-    padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
-    cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .2s;
-    letter-spacing: 0.3px;
-  }
-  .btn-concluir:hover { background: rgba(37,211,102,0.1); }
-  .btn-cancelar {
-    background: none; border: 1px solid rgba(224,82,82,0.4); color: var(--red);
-    padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
-    cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .2s;
-    letter-spacing: 0.3px;
-  }
-  .btn-cancelar:hover { background: rgba(224,82,82,0.1); 
   }
 </style>
 </head>
@@ -246,8 +198,23 @@
 
     <!-- TABLE -->
     <div class="section-title">Agendamentos do dia</div>
-  <div id="lista-agendamentos" class="ag-list">
-    <!-- Os agendamentos vão aparecer aqui dentro -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Horário</th>
+            <th>Cliente</th>
+            <th>WhatsApp</th>
+            <th>Serviço</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
 </div>
 
 <!-- MODAL CANCELAR -->
@@ -395,61 +362,34 @@ function renderLoading() {
 }
 
 function renderTable(list) {
-  const container = document.getElementById('lista-agendamentos');
-  
+  const tbody = document.getElementById('tbody');
   if (list.length === 0) {
-    container.innerHTML = '<div style="text-align:center; padding:40px; color:#9BA3A8;">Nenhum agendamento para hoje.</div>';
+    tbody.innerHTML = `
+      <tr><td colspan="7">
+        <div class="empty-state">
+          <span class="emoji">✂️</span>
+          <p>Nenhum agendamento para este dia.<br>Aproveite para descansar!</p>
+        </div>
+      </td></tr>`;
     return;
   }
-
-  container.innerHTML = list.map(a => `
-    <div class="ag-card status-${a.status || 'ativo'}">
-      <div class="ag-time">${a.horario}</div>
-      <div class="ag-info">
-        <span class="badge badge-${a.status || 'ativo'}">${a.status || 'ativo'}</span>
-        <div class="ag-name">${a.cliente}</div>
-        <div style="font-size: 12px; color: #9BA3A8;">
-          ${a.servico} • R$${a.preco} • 
-          <a href="https://wa.me/55${a.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:#25D366; text-decoration:none;">WhatsApp</a>
-        </div>
-      </div>
-      ${(a.status || 'ativo') === 'ativo' ? `
-        <div class="ag-actions">
-          <button class="btn-small" style="color:#25D366; border-color:#25D366;" onclick="markConcluido('${a.id}')">✓</button>
-          <button class="btn-small" style="color:#E05252; border-color:#E05252;" onclick="openCancel('${a.id}')">✕</button>
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-  const ul = document.createElement('div');
-  ul.className = 'ag-list';
-
-  list.forEach(a => {
-    const ativo = (a.status || 'ativo') === 'ativo';
-    const card = document.createElement('div');
-    card.className = `ag-card status-${a.status || 'ativo'}`;
-    card.innerHTML = `
-      <div class="ag-time">${a.horario || '—'}</div>
-      <div class="ag-name">${a.cliente || '—'}</div>
-      <div class="ag-meta">
-        <span>✂️ ${a.servico || '—'}</span>
-        <span>💰 R$${a.preco || '—'}</span>
-        <a href="https://wa.me/55${(a.whatsapp||'').replace(/\D/g,'')}" target="_blank">📱 ${a.whatsapp || '—'}</a>
-      </div>
-      <div class="ag-footer">
-        <span class="badge badge-${a.status || 'ativo'}">${a.status || 'ativo'}</span>
-        ${ativo ? `
-          <div class="ag-actions">
-            <button class="btn-concluir" onclick="markConcluido('${a.id}')">✓ Concluído</button>
-            <button class="btn-cancelar" onclick="openCancel('${a.id}')">✕ Cancelar</button>
-          </div>` : ''}
-      </div>`;
-    ul.appendChild(card);
-  });
-
-  wrap.appendChild(ul);
+  tbody.innerHTML = list.map(a => `
+    <tr>
+      <td><strong>${a.horario || '—'}</strong></td>
+      <td>${a.cliente || '—'}</td>
+      <td><a href="https://wa.me/55${(a.whatsapp||'').replace(/\D/g,'')}" target="_blank" style="color:var(--accent);text-decoration:none">
+        ${a.whatsapp || '—'}
+      </a></td>
+      <td>${a.servico || '—'}</td>
+      <td>R$${a.preco || '—'}</td>
+      <td><span class="badge badge-${a.status || 'ativo'}">${a.status || 'ativo'}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${a.status === 'ativo' ? `
+          <button class="btn-small" onclick="markConcluido('${a.id}')">✓ Concluído</button>
+          <button class="btn-small" onclick="openCancel('${a.id}')">✕ Cancelar</button>
+        ` : '—'}
+      </td>
+    </tr>`).join('');
 }
 
 function renderStats(list) {
